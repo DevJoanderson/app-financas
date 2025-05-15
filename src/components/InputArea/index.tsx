@@ -21,6 +21,11 @@ export const InputArea = ({ onAdd }: Props) => {
         value: parseFloat(value),
       };
 
+      console.log("Item criado para envio:", {
+        ...newItem,
+        dateFormatada: date, // Para comparação direta
+      });
+
       onAdd(newItem);
 
       // Limpa os campos após adicionar
