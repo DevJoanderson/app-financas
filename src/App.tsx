@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import * as C from "./App.styles";
 import { Item } from "./types/Item";
 import { categories } from "./data/categories";
@@ -7,6 +7,8 @@ import { TableArea } from "./components/TableArea";
 import { InfoArea } from "./components/InfoArea";
 import { InputArea } from "./components/InputArea";
 import { Login } from "./pages/Login";
+import CadastroUsuario from "./pages/CadastroUsuario";
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 const App = () => {
   const [list, setList] = useState<Item[]>([]);
@@ -18,7 +20,6 @@ const App = () => {
     localStorage.getItem("token")
   );
 
-  // Buscar despesas do backend após login e quando mudar o mês
   useEffect(() => {
     if (!token) return;
 
@@ -54,13 +55,11 @@ const App = () => {
       .catch((err) => console.error("Erro ao buscar despesas:", err.message));
   }, [token, currentMonth]);
 
-  // Atualizar lista filtrada
   useEffect(() => {
     const listaFiltrada = filterListByMonth(list, currentMonth);
     setFilteredList(listaFiltrada);
   }, [list, currentMonth]);
 
-  // Calcular receitas e despesas
   useEffect(() => {
     let incomeCount = 0;
     let expenseCount = 0;
@@ -96,7 +95,7 @@ const App = () => {
         descricao: item.title,
         valor: item.value,
         categoria: item.category,
-        data: item.date.toISOString(), // formato padrão aceito
+        data: item.date.toISOString(),
       }),
     })
       .then(async (res) => {
@@ -123,35 +122,50 @@ const App = () => {
       .catch((err) => console.error("Erro ao adicionar despesa:", err.message));
   };
 
-  // Se não estiver logado, mostra tela de login
-  if (!token) {
-    return (
-      <Login
-        onLogin={(t) => {
-          setToken(t);
-          localStorage.setItem("token", t);
-        }}
-      />
-    );
-  }
+  const setTokenAndStore = (newToken: string | null) => {
+    setToken(newToken);
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+    } else {
+      localStorage.removeItem("token");
+    }
+  };
 
-  // Se estiver logado, mostra sistema
   return (
-    <C.Container>
-      <C.Header>
-        <C.HeaderText>Sistema Financeiro</C.HeaderText>
-      </C.Header>
-      <C.Body>
-        <InfoArea
-          currentMonth={currentMonth}
-          onMonthChange={handleMonthChange}
-          income={income}
-          expense={expense}
-        />
-        <InputArea onAdd={handleAddItem} />
-        <TableArea list={filteredList} />
-      </C.Body>
-    </C.Container>
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          token ? <Navigate to="/dashboard" /> : <Login onLogin={setTokenAndStore} />
+        }
+      />
+      <Route path="/cadastro" element={<CadastroUsuario />} />
+      <Route
+        path="/dashboard"
+        element={
+          token ? (
+            <C.Container>
+              <C.Header>
+                <C.HeaderText>Sistema Financeiro</C.HeaderText>
+              </C.Header>
+              <C.Body>
+                <InfoArea
+                  currentMonth={currentMonth}
+                  onMonthChange={handleMonthChange}
+                  income={income}
+                  expense={expense}
+                />
+                <InputArea onAdd={handleAddItem} />
+                <TableArea list={filteredList} />
+              </C.Body>
+            </C.Container>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route path="/" element={<Navigate to="/login" />} />
+    </Routes>
   );
 };
 

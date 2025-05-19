@@ -50,6 +50,7 @@ export default function Despesas() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDespesas(res.data);
+      console.log('Despesas carregadas:', res.data);
     } catch {
       alert("Erro ao carregar despesas");
     }
