@@ -47,6 +47,10 @@ export const InfoArea = ({ currentMonth, onMonthChange, income, expense }: Props
           value={income - expense}
           color={income - expense < 0 ? 'red' : 'green'}
         />
+        
+<C.FilterArea>
+  {/* inputs, selects, botão */}
+</C.FilterArea>
       </C.ResumeArea>
     </C.Container>
   );

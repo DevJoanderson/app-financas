@@ -7,6 +7,7 @@ type Props = {
 }
 export const TableArea = ({ list }: Props) => {
   return (
+    <C.TableWrapper>
     <C.Table>
       <thead>
         <tr>
@@ -22,5 +23,6 @@ export const TableArea = ({ list }: Props) => {
          ))}
       </tbody>
     </C.Table>
+    </C.TableWrapper>
   );
 };
