@@ -15,10 +15,11 @@ export const InputArea = ({ onAdd }: Props) => {
   const handleAdd = () => {
     if (date && category && title && value) {
       const newItem: Item = {
+        id: Date.now(), // ou uuid(), se quiser mais robusto
         date: new Date(date),
         category,
         title,
-        value: parseFloat(value),
+        value: Number(value),
       };
 
       console.log("Item criado para envio:", {

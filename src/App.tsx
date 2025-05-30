@@ -1,190 +1,189 @@
-// Importações principais
 import React, { useState, useEffect } from "react";
-import * as C from "./App.styles"; // Estilos com styled-components
-import { Item } from "./types/Item"; // Tipo dos itens da lista
-import { categories } from "./data/categories"; // Categorias de despesas
-import { getCurrentMonth, filterListByMonth } from "./helpers/dateFilter"; // Funções auxiliares
-import { TableArea } from "./components/TableArea"; // Tabela de despesas
-import { InfoArea } from "./components/InfoArea"; // Área com resumo financeiro
-import { InputArea } from "./components/InputArea"; // Formulário para adicionar despesas
-import { Login } from "./pages/Login"; // Página de login
-import CadastroUsuario from "./pages/CadastroUsuario"; // Página de cadastro
-import { Routes, Route, Navigate } from 'react-router-dom'; // Rotas da aplicação
+import * as C from "./App.styles";
+import { Item } from "./types/Item";
+import { categories } from "./data/categories";
+import { getCurrentMonth, filterListByMonth } from "./helpers/dateFilter";
+import { TableArea } from "./components/TableArea";
+import { InfoArea } from "./components/InfoArea";
+import { InputArea } from "./components/InputArea";
+import { Login } from "./pages/Login";
+import CadastroUsuario from "./pages/CadastroUsuario";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { EditModal } from "./components/EditModal";
+import { Footer } from "./components/Rodape/Footer";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
 
 const App = () => {
-  // Estado geral do app
-  const [list, setList] = useState<Item[]>([]); // Lista completa de despesas
-  const [filteredList, setFilteredList] = useState<Item[]>([]); // Lista filtrada por mês
-  const [currentMonth, setCurrentMonth] = useState(getCurrentMonth); // Mês atual selecionado
-  const [income, setIncome] = useState(0); // Total de receitas
-  const [expense, setExpense] = useState(0); // Total de despesas
+  const [list, setList] = useState<Item[]>([]);
+  const [filteredList, setFilteredList] = useState<Item[]>([]);
+  const [currentMonth, setCurrentMonth] = useState(getCurrentMonth);
+  const [income, setIncome] = useState(0);
+  const [expense, setExpense] = useState(0);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
 
-  // Token JWT armazenado no navegador (localStorage)
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem("token")
-  );
-
-  // Verificação inicial do token (expiração)
+  // Valida o token no carregamento
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1])); // Decodifica o payload
-      const now = Date.now() / 1000; // Tempo atual em segundos
-
-      // Se token expirou, remove do localStorage e reseta estado
-      if (payload.exp < now) {
-        localStorage.removeItem("token");
-        setToken(null);
-      }
-    } catch (error) {
+  if (!token) return;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.exp < Date.now() / 1000) {
       localStorage.removeItem("token");
       setToken(null);
     }
-  }, []);
+  } catch {
+    localStorage.removeItem("token");
+    setToken(null);
+  }
+}, [token]);
+
+  // Validação recorrente a cada 10s
   useEffect(() => {
-  const interval = setInterval(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      // Decodifica o token para acessar o payload (dados internos)
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const now = Date.now() / 1000; // Tempo atual em segundos
-
-      // Se o token estiver expirado, remove e limpa do estado
-      if (payload.exp < now) {
+    const interval = setInterval(() => {
+      if (!token) return;
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.exp < Date.now() / 1000) {
+          localStorage.removeItem("token");
+          setToken(null);
+        }
+      } catch {
         localStorage.removeItem("token");
         setToken(null);
-        console.log("Token expirado - usuário será desconectado.");
       }
-    } catch (error) {
-      // Em caso de erro (ex: token malformado), também remove e limpa
-      localStorage.removeItem("token");
-      setToken(null);
-      console.log("Erro ao decodificar token - usuário desconectado.");
-    }
-  }, 10000); // Verifica a cada 10 segundos (10.000 milissegundos)
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [token]);
 
-  // Limpa o intervalo quando o componente for desmontado
-  return () => clearInterval(interval);
-}, []);
-
-
-  // Buscar despesas do backend com base no mês atual
+  // Buscar despesas do backend
   useEffect(() => {
     if (!token) return;
-
     const [ano, mes] = currentMonth.split("-");
-
-    fetch(`http://localhost:4000/api/despesas?mes=${parseInt(mes)}&ano=${ano}`, {
+    fetch(`${API_URL}/api/despesas?mes=${parseInt(mes)}&ano=${ano}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token.trim()}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(async (res) => {
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Erro ao buscar despesas");
-        }
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
-        if (!Array.isArray(data)) {
-          throw new Error("Resposta inválida: não é um array");
-        }
-
-        // Mapeia as despesas recebidas para o formato usado no app
-        const despesasConvertidas: Item[] = data.map((despesa: any) => ({
-          date: new Date(despesa.data),
-          category: despesa.categoria,
-          title: despesa.descricao,
-          value: despesa.valor,
+        const despesasConvertidas: Item[] = data.map((d: any) => ({
+          id: d.id,
+          date: new Date(d.data),
+          category: d.categoria,
+          title: d.descricao,
+          value: d.valor,
         }));
-
-        setList(despesasConvertidas); // Salva lista no estado
+        setList(despesasConvertidas);
       })
-      .catch((err) =>
-        console.error("Erro ao buscar despesas:", err.message)
-      );
+      .catch((err) => {
+        if (err instanceof Error) {
+          console.error("Erro ao buscar despesas:", err.message);
+        } else {
+          console.error("Erro desconhecido:", err);
+        }
+      });
   }, [token, currentMonth]);
 
-  // Sempre que a lista mudar, atualiza a versão filtrada pelo mês
   useEffect(() => {
-    const listaFiltrada = filterListByMonth(list, currentMonth);
-    setFilteredList(listaFiltrada);
+    setFilteredList(filterListByMonth(list, currentMonth));
   }, [list, currentMonth]);
 
-  // Sempre que a lista filtrada mudar, recalcula totais
   useEffect(() => {
     let incomeCount = 0;
     let expenseCount = 0;
-
-    for (let item of filteredList) {
-      if (categories[item.category]?.expense) {
-        expenseCount += item.value; // Soma despesas
-      } else {
-        incomeCount += item.value; // Soma receitas
-      }
-    }
-
+    filteredList.forEach((item) => {
+      categories[item.category]?.expense ? (expenseCount += item.value) : (incomeCount += item.value);
+    });
     setIncome(incomeCount);
     setExpense(expenseCount);
   }, [filteredList]);
 
-  // Atualiza o mês atual visualizado
-  const handleMonthChange = (newMonth: string) => {
-    setCurrentMonth(newMonth);
-  };
+  const handleMonthChange = (newMonth: string) => setCurrentMonth(newMonth);
 
-  // Adiciona uma nova despesa no backend
-  const handleAddItem = (item: Item) => {
+  const handleAddItem = async (item: Item) => {
     if (!token) return;
-
     const [ano, mes] = currentMonth.split("-");
-
-    fetch(`http://localhost:4000/api/despesas?mes=${parseInt(mes)}&ano=${ano}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.trim()}`,
-      },
-      body: JSON.stringify({
-        descricao: item.title,
-        valor: item.value,
-        categoria: item.category,
-        data: item.date.toISOString(),
-      }),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Erro ao adicionar despesa");
-        }
-        return res.json();
-      })
-      .then((novaDespesa) => {
-        // Converte resposta do backend para o formato do app
-        const novoItem: Item = {
-          date: new Date(novaDespesa.data),
-          category: novaDespesa.categoria,
-          title: novaDespesa.descricao,
-          value: novaDespesa.valor,
-        };
-
-        // Atualiza a lista com o novo item
-        setList((prev) => {
-          const novaLista = [...prev, novoItem];
-          setFilteredList(filterListByMonth(novaLista, currentMonth));
-          return novaLista;
-        });
-      })
-      .catch((err) => console.error("Erro ao adicionar despesa:", err.message));
+    try {
+      const res = await fetch(`${API_URL}/api/despesas?mes=${parseInt(mes)}&ano=${ano}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          descricao: item.title,
+          valor: item.value,
+          categoria: item.category,
+          data: item.date.toISOString(),
+        }),
+      });
+      const nova = await res.json();
+      setList((prev) => [...prev, {
+        id: nova.id,
+        date: new Date(nova.data),
+        category: nova.categoria,
+        title: nova.descricao,
+        value: nova.valor,
+      }]);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Erro ao adicionar despesa:", err.message);
+      } else {
+        console.error("Erro desconhecido ao adicionar despesa:", err);
+      }
+    }
   };
 
-  // Função para atualizar o token no estado e no localStorage
+  const handleDeleteItem = async (item: Item) => {
+    if (!token || !window.confirm("Deseja excluir essa despesa?")) return;
+    try {
+      await fetch(`${API_URL}/api/despesas/${item.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setList((prev) => prev.filter((i) => i.id !== item.id));
+    } catch (err) {
+      if (err instanceof Error) {
+        alert("Erro ao excluir: " + err.message);
+      } else {
+        alert("Erro desconhecido ao excluir despesa.");
+      }
+    }
+  };
+
+  const handleEditItem = (item: Item) => setEditingItem(item);
+
+  const handleSaveEdit = async (updatedItem: Item) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/despesas/${updatedItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          descricao: updatedItem.title,
+          valor: updatedItem.value,
+          categoria: updatedItem.category,
+          data: updatedItem.date.toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error("Erro ao editar");
+      setList((prev) =>
+        prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
+      );
+      setEditingItem(null);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert("Erro ao editar: " + err.message);
+      } else {
+        alert("Erro desconhecido ao editar.");
+      }
+    }
+  };
+
   const setTokenAndStore = (newToken: string | null) => {
     setToken(newToken);
     if (newToken) {
@@ -194,21 +193,13 @@ const App = () => {
     }
   };
 
-  // Rotas do sistema com base no login
   return (
     <Routes>
-      {/* Rota de login */}
       <Route
         path="/login"
-        element={
-          token ? <Navigate to="/dashboard" /> : <Login onLogin={setTokenAndStore} />
-        }
+        element={token ? <Navigate to="/dashboard" /> : <Login onLogin={setTokenAndStore} />}
       />
-
-      {/* Página de cadastro */}
       <Route path="/cadastro" element={<CadastroUsuario />} />
-
-      {/* Página principal (Dashboard) */}
       <Route
         path="/dashboard"
         element={
@@ -218,26 +209,25 @@ const App = () => {
                 <C.HeaderText>Sistema Financeiro</C.HeaderText>
               </C.Header>
               <C.Body>
-                {/* Área de resumo */}
                 <InfoArea
                   currentMonth={currentMonth}
                   onMonthChange={handleMonthChange}
                   income={income}
                   expense={expense}
                 />
-                {/* Formulário para adicionar item */}
                 <InputArea onAdd={handleAddItem} />
-                {/* Tabela com despesas */}
-                <TableArea list={filteredList} />
+                <TableArea list={filteredList} onDelete={handleDeleteItem} onEdit={handleEditItem} />
               </C.Body>
+              <Footer />
+              {editingItem && (
+                <EditModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSaveEdit} />
+              )}
             </C.Container>
           ) : (
             <Navigate to="/login" />
           )
         }
       />
-
-      {/* Rota raiz redireciona para login */}
       <Route path="/" element={<Navigate to="/login" />} />
     </Routes>
   );

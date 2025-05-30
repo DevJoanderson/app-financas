@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:4000', // Confere com o server.js
+  baseURL: "https://sistema-financeiro-backend.onrender.com/api"
+, // Confere com o server.js
 });
 
 // Interceptor para incluir o token JWT automaticamente nas requisições
@@ -12,6 +13,12 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+ 
+const apiAuth = axios.create({
+  baseURL: "https://sistema-financeiro-backend.onrender.com/api/auth",
+});
+
+export {apiAuth}
 
 api.interceptors.response.use(
   response => response,

@@ -1,37 +1,27 @@
-
 import styled from 'styled-components';
 
 export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex: 1;
   min-width: 100px;
-  margin: 10px;
-  
-  @media (max-width: 768px) {
-    flex: none;
-    width: 100%;
-    text-align: center;
-  }
+  margin: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
 `;
 
 export const Title = styled.div`
-  text-align: center;
-  font-weight: bold;
-  font-size: 16px;
-  color: #888;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #666;
   margin-bottom: 5px;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
 `;
 
-export const Info = styled.div< {color?: string }>`
-text-align: center;
-font-weight: bold;
-color: #000;
-color: ${props => props.color ?? '#000'};
-
-@media (max-width: 768px) {
-  font-size: 14px;
-}
+export const Info = styled.div<{ color?: string }>`
+  font-size: 1rem;
+  font-weight: bold;
+  color: ${props => props.color ?? '#000'};
 `;

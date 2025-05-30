@@ -1,44 +1,49 @@
-
-import {styled} from 'styled-components'
+import { styled } from 'styled-components';
 
 export const Container = styled.div`
+  margin-top: 10px;
+  background-color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  background-color: #fff;
-  box-shadow: 0px 0px 5px #ccc;
-  border-radius: 10px;
-  margin-top: 20px;
-  padding: 20px;
+  gap: 8px;
+  justify-content: space-between;
 
-  input,
-  select {
-    flex: 1;
-    min-width: 150px;
-    padding: 8px;
-    font-size: 16px;
-    border-radius: 5px;
+  input, select {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px;
+    min-width: 100px;
+    font-size: 14px;
   }
 
   button {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: #fff;
+    background-color: #00c897;
+    color: white;
     border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-weight: bold;
     cursor: pointer;
-    border-radius: 5px;
+    transition: background 0.2s;
+
     &:hover {
-      background-color: #0056b3;
+      background-color: #00b388;
     }
-  }
-
-  @media (max-width: 768px) {
+    @media (max-width: 768px) {
     flex-direction: column;
+    gap: 10px;
 
-    input,
-    select,
-    button {
+    input, select, button {
       width: 100%;
     }
   }
+
+
+  }
 `;
+
+
+  

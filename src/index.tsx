@@ -9,7 +9,7 @@ if (container) { // Verifica se o elemento com o ID 'root' foi encontrado
   const root = ReactDOM.createRoot(container);
   root.render(
     <React.StrictMode>
-      <BrowserRouter basename="/DevJoanderson/app-financa">
+     <BrowserRouter>
         <App />
       </BrowserRouter>
     </React.StrictMode>

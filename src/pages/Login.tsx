@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Importe o Link do react-router-dom
-import api from "../services/api";
+import { Link } from "react-router-dom";
+import { apiAuth } from "../services/api"; // ✅ usa o serviço correto
 import "./Login.css";
 
 interface LoginResponse {
@@ -8,35 +8,35 @@ interface LoginResponse {
 }
 
 interface LoginProps {
-  onLogin: (token: string | null) => void; // Permita passar null para o token
+  onLogin: (token: string | null) => void;
 }
 
 function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [error, setError] = useState<string | null>(null); // Estado para armazenar mensagens de erro
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Limpa qualquer erro anterior
+    setError(null);
     setLoading(true);
 
     try {
-      const res = await api.post<LoginResponse>("/login", { email, senha });
+      const res = await apiAuth.post<LoginResponse>("/login", { email, senha });
       localStorage.setItem("token", res.data.token);
-      onLogin(res.data.token); // Passa o token para o componente App
+      onLogin(res.data.token);
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message ||
-        "Login falhou. Verifique seu email e senha.";
-      setError(errorMessage); // Atualiza o estado de erro
+        error.response?.data?.message || "Login falhou. Verifique seu email e senha.";
+      setError(errorMessage);
       onLogin(null);
       console.error("Erro no login:", error);
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="login-container">
       <div className="login-card">

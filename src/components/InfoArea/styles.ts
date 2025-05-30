@@ -1,130 +1,102 @@
 import styled from 'styled-components';
 
-
+// CONTAINER GERAL DA SEÇÃO
 export const Container = styled.div`
   background-color: #fff;
-  box-shadow: 0px 0px 5px #ccc;
-  padding: 20px;
+  padding: 4px 6px;
   border-radius: 10px;
-  margin-top: 10px; // melhor controle
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
+  box-shadow: 0 0 4px #ccc;
+  margin: 16px 0;
 `;
 
-
+// ÁREA DO MÊS E CONTROLE
 export const MonthArea = styled.div`
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  
-  input[type="month"] {
-    padding: 5px;
-    font-size: 16px;
-  }
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: space-between;
-
-    input[type='month'] {
-      flex: 1;
-    }
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    align-items: stretch;
+  input {
+    margin-top: 8px;
+    max-width: 160px;
   }
 `;
 
 export const MonthArrow = styled.div`
-  width: 40px;
-  text-align: center;
-  font-size: 25px;
+  font-size: 24px;
   cursor: pointer;
+  padding: 4px;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    font-size: 20px;
+  &:hover {
+    opacity: 0.8;
   }
 `;
+
 export const MonthTitle = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-weight: 600;
+  font-size: 18px;
   text-align: center;
+`;
+
+// RESUMO COM VALORES (Receita, Despesa, Balanço)
+export const ResumeArea = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
 
   @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-`;
-
-
-export const ResumeArea = styled.div`
-  flex: 2;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  font-size: 12px;
-  gap: 40px;
-
-   @media (max-width: 768px) {
     flex-direction: column;
-    margin-left: 0;
-    gap: 10px;
-    align-items: center;
-    font-size: 14px;
+    gap: 12px;
   }
 `;
 
+// ÁREA OPCIONAL DE FILTROS (ex: inputs, selects)
 export const FilterArea = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  width: 100%;
-  justify-content: space-between;
+  margin-top: 16px;
 
   input,
   select {
+    padding: 8px;
+    font-size: 14px;
+    max-width: 200px;
+  }
+`;
+
+// ÁREA DOS GRÁFICOS
+// Exemplo: InfoArea/styles.ts
+
+export const ChartsArea = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+  width: 100%;
+
+  > div {
+    flex: 1 1 45%;
+    min-width: 280px;
+    max-width: 100%;
     padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
+    box-sizing: border-box;
     border: 1px solid #ccc;
-    min-width: 150px;
-    flex: 1;
-  }
+    border-radius: 10px;
+    background-color: #fff;
 
-  button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    max-width: 150px;
-  }
-
-  button:hover {
-    background-color: #0056b3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   @media (max-width: 768px) {
     flex-direction: column;
+    align-items: center;
 
-    input,
-    select,
-    button {
+    > div {
       width: 100%;
     }
   }
