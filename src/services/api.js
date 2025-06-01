@@ -1,10 +1,10 @@
 import axios from 'axios';
 
+// 🔐 API protegida (com token) - para despesas, etc.
 const api = axios.create({
-  baseURL: 'http://localhost:4000', // Confere com o server.js
+  baseURL: 'http://localhost:4000/api',
 });
 
-// Interceptor para incluir o token JWT automaticamente nas requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -14,15 +14,19 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response.status === 401) {
-
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
-)
+);
+
+// 🔓 API pública (sem token) - para login e cadastro
+export const apiAuth = axios.create({
+  baseURL: 'http://localhost:4000/api/auth',
+});
 
 export default api;

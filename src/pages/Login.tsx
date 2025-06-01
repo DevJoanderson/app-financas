@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Importe o Link do react-router-dom
-import api from "../services/api";
+import { Link } from "react-router-dom";
+import { apiAuth } from "../services/api"; // ✅ Usando a API correta
 import "./Login.css";
 
 interface LoginResponse {
@@ -8,35 +8,45 @@ interface LoginResponse {
 }
 
 interface LoginProps {
-  onLogin: (token: string | null) => void; // Permita passar null para o token
+  onLogin: (token: string | null) => void;
 }
 
 function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [error, setError] = useState<string | null>(null); // Estado para armazenar mensagens de erro
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Limpa qualquer erro anterior
+    setError(null);
     setLoading(true);
 
     try {
-      const res = await api.post<LoginResponse>("/login", { email, senha });
+      const res = await apiAuth.post<LoginResponse>("/login", { email, senha });
       localStorage.setItem("token", res.data.token);
-      onLogin(res.data.token); // Passa o token para o componente App
+      onLogin(res.data.token);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Login falhou. Verifique seu email e senha.";
-      setError(errorMessage); // Atualiza o estado de erro
-      onLogin(null);
       console.error("Erro no login:", error);
+
+      const status = error?.response?.status;
+
+      if (status === 401) {
+        setError("Email ou senha incorretos.");
+      } else if (status === 404) {
+        setError("Rota de login não encontrada.");
+      } else if (!error.response) {
+        setError("Servidor offline ou inacessível.");
+      } else {
+        setError("Erro inesperado ao tentar logar.");
+      }
+
+      onLogin(null);
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="login-container">
       <div className="login-card">

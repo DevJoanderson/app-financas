@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/web-financeiro", "destination": "/web-financeiro/index.html" },
+    { "source": "/web-financeiro/:path*", "destination": "/web-financeiro/index.html" }
+  ]
+}
