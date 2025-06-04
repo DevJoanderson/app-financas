@@ -19,7 +19,6 @@ export const TableWrapper = styled.div`
 
 export const Table = styled.table`
   width: 100%;
-
   background-color: #fff;
   padding: 20px;
   box-shadow: 0px 0px 5px #ccc;

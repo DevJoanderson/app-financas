@@ -44,7 +44,7 @@ export const HeaderText = styled.h1`
 export const Body = styled.div`
   margin: auto;
   max-width: 980px;
-  margin-bottom: 50px;
+  margin-bottom: 10px;
 
   @media (max-width: 768px) {
     padding: 0 10px;

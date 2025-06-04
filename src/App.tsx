@@ -9,7 +9,11 @@ import { InfoArea } from "./components/InfoArea"; // Área com resumo financeiro
 import { InputArea } from "./components/InputArea"; // Formulário para adicionar despesas
 import { Login } from "./pages/Login"; // Página de login
 import CadastroUsuario from "./pages/CadastroUsuario"; // Página de cadastro
-import { Routes, Route, Navigate } from 'react-router-dom'; // Rotas da aplicação
+import { Routes, Route, Navigate } from "react-router-dom"; // Rotas da aplicação
+import { BarChartComponent } from "../src/components/graficos/BarChartComponent";
+import { ChartContainer } from "./components/graficos/ChartWrapper";
+import { MainContainer } from "./components/graficos/MainContainer";
+import { PieChartComponent } from "./components/graficos/PieChartComponent";
 
 const App = () => {
   // Estado geral do app
@@ -44,33 +48,32 @@ const App = () => {
     }
   }, []);
   useEffect(() => {
-  const interval = setInterval(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    const interval = setInterval(() => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    try {
-      // Decodifica o token para acessar o payload (dados internos)
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const now = Date.now() / 1000; // Tempo atual em segundos
+      try {
+        // Decodifica o token para acessar o payload (dados internos)
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const now = Date.now() / 1000; // Tempo atual em segundos
 
-      // Se o token estiver expirado, remove e limpa do estado
-      if (payload.exp < now) {
+        // Se o token estiver expirado, remove e limpa do estado
+        if (payload.exp < now) {
+          localStorage.removeItem("token");
+          setToken(null);
+          console.log("Token expirado - usuário será desconectado.");
+        }
+      } catch (error) {
+        // Em caso de erro (ex: token malformado), também remove e limpa
         localStorage.removeItem("token");
         setToken(null);
-        console.log("Token expirado - usuário será desconectado.");
+        console.log("Erro ao decodificar token - usuário desconectado.");
       }
-    } catch (error) {
-      // Em caso de erro (ex: token malformado), também remove e limpa
-      localStorage.removeItem("token");
-      setToken(null);
-      console.log("Erro ao decodificar token - usuário desconectado.");
-    }
-  }, 10000); // Verifica a cada 10 segundos (10.000 milissegundos)
+    }, 10000); // Verifica a cada 10 segundos (10.000 milissegundos)
 
-  // Limpa o intervalo quando o componente for desmontado
-  return () => clearInterval(interval);
-}, []);
-
+    // Limpa o intervalo quando o componente for desmontado
+    return () => clearInterval(interval);
+  }, []);
 
   // Buscar despesas do backend com base no mês atual
   useEffect(() => {
@@ -78,12 +81,15 @@ const App = () => {
 
     const [ano, mes] = currentMonth.split("-");
 
-    fetch(`http://localhost:4000/api/despesas?mes=${parseInt(mes)}&ano=${ano}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token.trim()}`,
-      },
-    })
+    fetch(
+      `http://localhost:4000/api/despesas?mes=${parseInt(mes)}&ano=${ano}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token.trim()}`,
+        },
+      }
+    )
       .then(async (res) => {
         if (!res.ok) {
           const errorData = await res.json();
@@ -106,9 +112,7 @@ const App = () => {
 
         setList(despesasConvertidas); // Salva lista no estado
       })
-      .catch((err) =>
-        console.error("Erro ao buscar despesas:", err.message)
-      );
+      .catch((err) => console.error("Erro ao buscar despesas:", err.message));
   }, [token, currentMonth]);
 
   // Sempre que a lista mudar, atualiza a versão filtrada pelo mês
@@ -145,19 +149,22 @@ const App = () => {
 
     const [ano, mes] = currentMonth.split("-");
 
-    fetch(`http://localhost:4000/api/despesas?mes=${parseInt(mes)}&ano=${ano}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.trim()}`,
-      },
-      body: JSON.stringify({
-        descricao: item.title,
-        valor: item.value,
-        categoria: item.category,
-        data: item.date.toISOString(),
-      }),
-    })
+    fetch(
+      `http://localhost:4000/api/despesas?mes=${parseInt(mes)}&ano=${ano}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.trim()}`,
+        },
+        body: JSON.stringify({
+          descricao: item.title,
+          valor: item.value,
+          categoria: item.category,
+          data: item.date.toISOString(),
+        }),
+      }
+    )
       .then(async (res) => {
         if (!res.ok) {
           const errorData = await res.json();
@@ -201,7 +208,11 @@ const App = () => {
       <Route
         path="/login"
         element={
-          token ? <Navigate to="/dashboard" /> : <Login onLogin={setTokenAndStore} />
+          token ? (
+            <Navigate to="/dashboard" />
+          ) : (
+            <Login onLogin={setTokenAndStore} />
+          )
         }
       />
 
@@ -213,24 +224,27 @@ const App = () => {
         path="/dashboard"
         element={
           token ? (
-            <C.Container>
-              <C.Header>
-                <C.HeaderText>Sistema Financeiro</C.HeaderText>
-              </C.Header>
-              <C.Body>
-                {/* Área de resumo */}
-                <InfoArea
-                  currentMonth={currentMonth}
-                  onMonthChange={handleMonthChange}
-                  income={income}
-                  expense={expense}
-                />
-                {/* Formulário para adicionar item */}
-                <InputArea onAdd={handleAddItem} />
-                {/* Tabela com despesas */}
-                <TableArea list={filteredList} />
-              </C.Body>
-            </C.Container>
+            <MainContainer>
+              <C.Container>
+                <C.Header>
+                  <C.HeaderText>Sistema Financeiro</C.HeaderText>
+                </C.Header>
+                <C.Body>
+                  <ChartContainer>
+                    <InfoArea
+                      currentMonth={currentMonth}
+                      onMonthChange={handleMonthChange}
+                      income={income}
+                      expense={expense}
+                    />
+                    <PieChartComponent currentMonth={currentMonth} />
+                    <BarChartComponent />
+                  </ChartContainer>
+                  <InputArea onAdd={handleAddItem} />
+                  <TableArea list={filteredList} />
+                </C.Body>
+              </C.Container>
+            </MainContainer>
           ) : (
             <Navigate to="/login" />
           )

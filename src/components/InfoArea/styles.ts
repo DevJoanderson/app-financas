@@ -1,62 +1,57 @@
-import styled from 'styled-components';
-
+import styled from "styled-components";
 
 export const Container = styled.div`
   background-color: #fff;
-  box-shadow: 0px 0px 5px #ccc;
-  padding: 20px;
+  box-shadow: 0 0 5px #ccc;
+  padding: 15px;
   border-radius: 10px;
-  margin-top: 10px; // melhor controle
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
 
   @media (min-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column; /* Mantenha vertical se quiser ele empilhado */
     align-items: center;
+    justify-content: center;
   }
 `;
 
 
 export const MonthArea = styled.div`
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  
+  gap: 8px;
+  flex-wrap: wrap;
+
   input[type="month"] {
     padding: 5px;
-    font-size: 16px;
+    font-size: 14px;
+    height: 35px;
   }
 
   @media (max-width: 768px) {
-    width: 100%;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 6px;
 
-    input[type='month'] {
-      flex: 1;
+    input[type="month"] {
+      width: 100%;
     }
   }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
 `;
+
 
 export const MonthArrow = styled.div`
-  width: 40px;
-  text-align: center;
-  font-size: 25px;
+  font-size: 22px;
   cursor: pointer;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    font-size: 20px;
+  &:hover {
+    opacity: 0.7;
   }
 `;
+
 export const MonthTitle = styled.div`
   flex: 1;
   display: flex;
@@ -69,7 +64,6 @@ export const MonthTitle = styled.div`
   }
 `;
 
-
 export const ResumeArea = styled.div`
   flex: 2;
   display: flex;
@@ -78,7 +72,7 @@ export const ResumeArea = styled.div`
   font-size: 12px;
   gap: 40px;
 
-   @media (max-width: 768px) {
+  @media (max-width: 768px) {
     flex-direction: column;
     margin-left: 0;
     gap: 10px;
